@@ -7,7 +7,8 @@ namespace pingine.Main
         [STAThread]
         static void Main()
         {
-            new MainWindow().Run(60);
+            var window = new MainWindow();
+            window.Run(Config.UPS); // option sets the amount of times OnUpdateFrame(e) is called every second
         }
     }
 }
