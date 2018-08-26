@@ -14,5 +14,7 @@ namespace pingine.Main
         /* updates (to the game logic) per second
          * we want a fixed amount so that the game never increases/decreases in speed */
         public static int UPS = 60; 
+
+        public static string ResourceFolder = @"E:\Code\Projects\pingine\pingine\Resources\";
     }
 }
