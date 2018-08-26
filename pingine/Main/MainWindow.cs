@@ -69,12 +69,12 @@ namespace pingine.Main
             GL.CompileShader(fragmentShader);
 
             var programID = GL.CreateProgram();
-            GL.AttachShader(shaderProgramID, vertexShader);
-            GL.AttachShader(shaderProgramID, fragmentShader);
-            GL.LinkProgram(shaderProgramID);
+            GL.AttachShader(programID, vertexShader);
+            GL.AttachShader(programID, fragmentShader);
+            GL.LinkProgram(programID);
 
-            GL.DetachShader(shaderProgramID, vertexShader);
-            GL.DetachShader(shaderProgramID, fragmentShader);
+            GL.DetachShader(programID, vertexShader);
+            GL.DetachShader(programID, fragmentShader);
             GL.DeleteShader(vertexShader);
             GL.DeleteShader(fragmentShader);
 
@@ -86,18 +86,10 @@ namespace pingine.Main
             Closed += OnClosed;
         }
 
-        /* actions to do on window close */
-        private void OnClosed(object sender, EventArgs eventArgs)
+        /* actions to do on window resize */
+        protected override void OnResize(EventArgs e)
         {
-            Exit();
-        }
-
-        /* application exit */
-        public override void Exit()
-        {
-            GL.DeleteVertexArrays(1, ref vertexArrayID);
-            GL.DeleteProgram(shaderProgramID);
-            base.Exit();
+            GL.Viewport(0, 0, Width, Height); // we reset the viewport which i'm not sure we want? to be investigated
         }
 
         /* adding keyboard handling logic, we probably don't want to add anything else in here */
@@ -199,6 +191,20 @@ namespace pingine.Main
              * so that the back buffer replaces the front buffer and displays the scene to the player
              * then the buffer previously in front becomes the back buffer and can be drawn on for the next frame */
             SwapBuffers();
+        }
+
+        /* actions to do on window close */
+        private void OnClosed(object sender, EventArgs eventArgs)
+        {
+            Exit();
+        }
+
+        /* application exit */
+        public override void Exit()
+        {
+            GL.DeleteVertexArrays(1, ref vertexArrayID);
+            GL.DeleteProgram(shaderProgramID);
+            base.Exit();
         }
     }
 }
