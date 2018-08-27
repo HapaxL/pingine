@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Diagnostics;
-using System.IO;
+using System.Collections.Generic;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
@@ -13,16 +12,17 @@ namespace pingine.Main
     /* main game window that also handles game logic */
     public sealed class MainWindow : GameWindow
     {
+        ShaderHandler ShaderHandler;
         KeyboardHandler KeyboardHandler;
 
         /* (used for tutorial purposes) */
         ColorHSLA BackgroundColor;
 
         /* (used for tutorial purposes) */
-        int shaderProgramID;
+        int ShaderProgramID;
 
         /* (used for tutorial purposes) */
-        int vertexArrayID;
+        List<RenderObject> RenderObjects = new List<RenderObject>();
 
         /* total time elapsed since the application started
          * (used for tutorial purposes) */
@@ -44,6 +44,7 @@ namespace pingine.Main
         {
             // Title += " - OpenGL Version: " + GL.GetString(StringName.Version); // "4.6.0 NVIDIA 397.64" on my PC
 
+            ShaderHandler = new ShaderHandler();
             KeyboardHandler = new KeyboardHandler(false); // we don't want repeat enabled for a video game (except in menus or when writing something)
             BackgroundColor = new ColorHSLA();
             BackgroundColor.H = 0; // any hue
@@ -55,62 +56,45 @@ namespace pingine.Main
             Closed += OnClosed;
         }
 
+        private int CreateProgram()
+        {
+            /* the vertex shader is the first step in the rendering pipeline
+             * takes each raw vertex attribute data specified beforehand,
+             * processes them and generates a vertex as output */
+            ShaderHandler.AddShader(ShaderType.VertexShader, Config.ResourceFolder + @"Shaders\vertex.shader");
+            
+            /* the fragment shader is another step in the rendering pipeline
+             * takes each fragment from the rasterization step, and outputs
+             * a set of possible colors, a depth value, and a stencil (?) value
+             * (i don't think we actually need a fragment shader? the only
+             * one we need now is the one that applies texture on surfaces) */
+            ShaderHandler.AddShader(ShaderType.FragmentShader, Config.ResourceFolder + @"Shaders\fragment.shader");
+            
+            /* create the pipeline program */
+            return ShaderHandler.CompileProgram();
+        }
+
         /* actions to do on window (game) startup */
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-
-            // TODO: REFACTOR
-            // tutorial stuff
-            /* the vertex shader is the entry point in the rendering pipeline
-             * takes each raw vertex attribute data specified in step 1,
-             * processes them and generates a vertex as output */
-            var vertexShader = GL.CreateShader(ShaderType.VertexShader); // create the vertex shader object
-            GL.ShaderSource(vertexShader, File.ReadAllText(Config.ResourceFolder + @"Shaders\VertexShader.vert")); // populate it with the contents of the vertex shader file
-            GL.CompileShader(vertexShader); // compile the shader DUH
-            var info = GL.GetShaderInfoLog(vertexShader); // log info for the shader
-            if (!string.IsNullOrWhiteSpace(info))
-                Debug.WriteLine($"GL.CompileShader [{ShaderType.VertexShader}] had info log: {info}");
-
-            // tutorial stuff
-            /* the fragment shader is step 8 in the rendering pipeline
-             * takes each fragment from the rasterization step, and outputs
-             * a set of possible colors, a depth value, and a stencil (?) value */
-            var fragmentShader = GL.CreateShader(ShaderType.FragmentShader);
-            GL.ShaderSource(fragmentShader, File.ReadAllText(Config.ResourceFolder + @"Shaders\FragmentShader.frag"));
-            GL.CompileShader(fragmentShader);
-            info = GL.GetShaderInfoLog(fragmentShader);
-            if (!string.IsNullOrWhiteSpace(info))
-                Debug.WriteLine($"GL.CompileShader [{ShaderType.FragmentShader}] had info log: {info}");
-
-            // tutorial stuff
-            /* the program object that will execute all our shader code */
-            var programID = GL.CreateProgram();
             
-            /* we attach our vertex and fragment shaders to the program */
-            GL.AttachShader(programID, vertexShader);
-            GL.AttachShader(programID, fragmentShader);
+            Vertex[] vertices =
+            {
+                new Vertex(new Vector4(0f, 0f, 0f, 1.0f), Color4.Green),
+                new Vertex(new Vector4(0.5f, 0f, 0f, 1.0f), Color4.Red),
+                new Vertex(new Vector4(0f, 0.5f, 0f, 1.0f), Color4.Blue),
+                new Vertex(new Vector4(0.5f, 0.5f, 0f, 1.0f), Color4.Blue),
+            };
 
-            /* we "link" (~= compile and load) the program */
-            GL.LinkProgram(programID);
-            info = GL.GetProgramInfoLog(programID); // log info for the program
-            if (!string.IsNullOrWhiteSpace(info))
-                Debug.WriteLine($"GL.LinkProgram had info log: {info}");
+            RenderObjects.Add(new RenderObject(vertices));
 
-            /* then we can detach and delete the shaders in order to save up memory */
-            GL.DetachShader(programID, vertexShader);
-            GL.DetachShader(programID, fragmentShader);
-            GL.DeleteShader(vertexShader);
-            GL.DeleteShader(fragmentShader);
+            ShaderProgramID = CreateProgram();
 
-            /* save the program ID somewhere */
-            shaderProgramID = programID;
-            
-            /* generate vertex array objects (VAOs) whose IDs aren't already in use */
-            GL.GenVertexArrays(1, out vertexArrayID);
 
-            /* bind the VAOs to our OpenGL context for them to be used in the OpenGL process */
-            GL.BindVertexArray(vertexArrayID);
+            /* TODO figure this out because i have no idea what these do */
+            // GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
+            // GL.PatchParameter(PatchParameterInt.PatchVertices, 3);
         }
 
         /* actions to do on window resize */
@@ -206,7 +190,7 @@ namespace pingine.Main
             // tutorial stuff
             /* this outputs some point or whatever thanks to
              * the shader and the array data that we created on load */
-            GL.UseProgram(shaderProgramID); // we choose to use our program in our pipeline
+            GL.UseProgram(ShaderProgramID); // we choose to use our program in our pipeline
 
             /* the other entry point of the pipeline: attributes
              * those are sent as input to the vertex shader which needs an "in" attribute with
@@ -218,14 +202,12 @@ namespace pingine.Main
 
             /* vertex specification is the entry point of the pipeline
              * we declare things we want to draw, and which kind */
-            /* we specify that we want to take <count> VAO from our (active) vertex array(s),
-             * starting at index <first>, and treat it as a <mode>
-             * this gives us a primitive of the specified type that will be processed by the pipeline
-             * or something like that idk */
-            GL.DrawArrays(PrimitiveType.Points, 0, 1); 
+            foreach (var renderObject in RenderObjects)
+                renderObject.Render();
 
             /* we can apply some modifications to our primitives */
-            GL.PointSize(100); // change point size so that it's bigger than 1 pixel and we can see it
+            // GL.PointSize(10); // change point size so that it's bigger than 1 pixel and we can see it
+
 
             /* the scene is being drawn on the "back" buffer, which is hidden behind the "front" buffer
              * after we're finished drawing the scene on the back buffer, we use SwapBuffers()
@@ -247,9 +229,10 @@ namespace pingine.Main
         {
             // save the planet, free your memory
             /* delete the vertex arrays we were using */
-            GL.DeleteVertexArrays(1, ref vertexArrayID);
+            foreach (var renderObject in RenderObjects)
+                renderObject.Dispose();
             /* delete the program we were using */
-            GL.DeleteProgram(shaderProgramID);
+            GL.DeleteProgram(ShaderProgramID);
 
             /* exit application */
             base.Exit();
