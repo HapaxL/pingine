@@ -81,20 +81,21 @@ namespace pingine.Main
             
             Vertex[] vertices =
             {
-                new Vertex(new Vector4(0f, 0f, 0f, 1.0f), Color4.Green),
-                new Vertex(new Vector4(0.5f, 0f, 0f, 1.0f), Color4.Red),
-                new Vertex(new Vector4(0f, 0.5f, 0f, 1.0f), Color4.Blue),
-                new Vertex(new Vector4(0.5f, 0.5f, 0f, 1.0f), Color4.Blue),
+                new Vertex(new Vector4(0f, 0f, 0f, 1.0f), new Color4(1.0f, 0f, 0f, 1.0f)),
+                new Vertex(new Vector4(0.5f, 0f, 0f, 1.0f), new Color4(0f, 1.0f, 0f, 1.0f)),
+                new Vertex(new Vector4(0f, 0.5f, 0f, 1.0f), new Color4(0f, 0f, 1.0f, 1.0f)),
+                new Vertex(new Vector4(0.5f, 0f, 0f, 1.0f), new Color4(0f, 1.0f, 0f, 1.0f)),
+                new Vertex(new Vector4(0f, 0.5f, 0f, 1.0f), new Color4(0f, 0f, 1.0f, 1.0f)),
+                new Vertex(new Vector4(0.5f, 0.5f, 0f, 1.0f), new Color4(1.0f, 0f, 1.0f, 1.0f)),
             };
-
+            
             RenderObjects.Add(new RenderObject(vertices));
 
             ShaderProgramID = CreateProgram();
 
-
             /* TODO figure this out because i have no idea what these do */
-            // GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
-            // GL.PatchParameter(PatchParameterInt.PatchVertices, 3);
+            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
+            GL.PatchParameter(PatchParameterInt.PatchVertices, 3);
         }
 
         /* actions to do on window resize */

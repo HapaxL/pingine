@@ -69,29 +69,7 @@ namespace pingine.Main.Handlers
                 false,                  // does not need to be normalized as it is already, floats ignore this flag anyway
                 Vertex.Size,            // different values for the same attribute are separated by the size of a vertex
                 Vector4.SizeInBytes);   // starting position of the data (comes after a vec4)
-
-            // GL.VertexArrayAttribBinding(vertexArray, 0, 0);
-            // GL.EnableVertexArrayAttrib(vertexArray, 0);
-            // GL.VertexArrayAttribFormat(
-            //     vertexArray,
-            //     0,                      // attribute index, from the shader location = 0
-            //     4,                      // size of attribute, vec4
-            //     VertexAttribType.Float, // contains floats
-            //     false,                  // does not need to be normalized as it is already, floats ignore this flag anyway
-            //     0);                     // relative offset, first item
-
-            // GL.VertexArrayAttribBinding(vertexArray, 1, 0);
-            // GL.EnableVertexArrayAttrib(vertexArray, 1);
-            // GL.VertexArrayAttribFormat(
-            //     vertexArray,
-            //     1,                      // attribute index, from the shader location = 1
-            //     4,                      // size of attribute, vec4
-            //     VertexAttribType.Float, // contains floats
-            //     false,                  // does not need to be normalized as it is already, floats ignore this flag anyway
-            //     16);                    // relative offset after a vec4
-
-            // GL.VertexArrayVertexBuffer(vertexArray, 0, vertexBuffer, IntPtr.Zero, Vertex.Size);
-
+            
             initialized = true;
         }
 
@@ -104,7 +82,7 @@ namespace pingine.Main.Handlers
             // GL.BindVertexArray(vertexArray);
 
             /* draw <count> things considered as <type> starting with <first> */
-            // GL.DrawArrays(PrimitiveType.Triangles, 0, verticeCount);
+            GL.DrawArrays(PrimitiveType.Triangles, 0, verticeCount);
 
             /* we prefer using DrawElements because it factorizes reused vertices
              * like if we have a triangle ABC and a triangle BCD, DrawArray will 
@@ -114,8 +92,7 @@ namespace pingine.Main.Handlers
             /* actually i'm not even sure we do prefer DrawElements, it only saves draw calls for more complex models
              * but in the case of quads, if we have to call DrawElements as many times as we would call DrawArrays
              * there is no difference except the overhead from using indices in DrawElements so DrawArrays is better */
-            GL.DrawElements(PrimitiveType.Triangles, verticeCount, DrawElementsType.UnsignedInt, new int[] { 0, 1, 2 });
-            GL.DrawElements(PrimitiveType.Triangles, verticeCount, DrawElementsType.UnsignedInt, new int[] { 1, 2, 3 });
+            // GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, new int[] { 0, 1, 2, 1, 2, 3 });
         }
 
         /* IDisposable stuff */
