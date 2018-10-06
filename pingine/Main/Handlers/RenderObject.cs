@@ -82,7 +82,7 @@ namespace pingine.Main.Handlers
             // GL.BindVertexArray(vertexArray);
 
             /* draw <count> things considered as <type> starting with <first> */
-            GL.DrawArrays(PrimitiveType.Triangles, 0, verticeCount);
+            GL.DrawArrays(PrimitiveType.Quads, 0, verticeCount);
 
             /* we prefer using DrawElements because it factorizes reused vertices
              * like if we have a triangle ABC and a triangle BCD, DrawArray will 

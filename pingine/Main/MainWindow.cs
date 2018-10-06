@@ -97,10 +97,13 @@ namespace pingine.Main
             {
                 new Vertex(new Vector4(0f, 0f, 0f, 1.0f), new Color4(1.0f, 0f, 0f, 1.0f)),
                 new Vertex(new Vector4(0.5f, 0f, 0f, 1.0f), new Color4(0f, 1.0f, 0f, 1.0f)),
-                new Vertex(new Vector4(0f, 0.5f, 0f, 1.0f), new Color4(0f, 0f, 1.0f, 1.0f)),
-                new Vertex(new Vector4(0.5f, 0f, 0f, 1.0f), new Color4(0f, 1.0f, 0f, 1.0f)),
-                new Vertex(new Vector4(0f, 0.5f, 0f, 1.0f), new Color4(0f, 0f, 1.0f, 1.0f)),
-                new Vertex(new Vector4(0.5f, 0.5f, 0f, 1.0f), new Color4(1.0f, 0f, 1.0f, 1.0f)),
+                new Vertex(new Vector4(0.5f, 0.5f, 0f, 1.0f), new Color4(0f, 0f, 1.0f, 1.0f)),
+                new Vertex(new Vector4(0f, 0.5f, 0f, 1.0f), new Color4(1.0f, 0f, 1.0f, 1.0f)),
+
+                new Vertex(new Vector4(0f - 0.2f, 0f - 0.2f, 0.5f, 1.0f), new Color4(1.0f, 0f, 0f, 1.0f)),
+                new Vertex(new Vector4(0.5f - 0.2f, 0f - 0.2f, 0.5f, 1.0f), new Color4(0f, 1.0f, 0f, 1.0f)),
+                new Vertex(new Vector4(0.5f - 0.2f, 0.5f - 0.2f, 0.5f, 1.0f), new Color4(0f, 0f, 1.0f, 1.0f)),
+                new Vertex(new Vector4(0f - 0.2f, 0.5f - 0.2f, 0.5f, 1.0f), new Color4(1.0f, 0f, 1.0f, 1.0f)),
             };
             
             RenderObjects.Add(new RenderObject(vertices));
@@ -114,6 +117,16 @@ namespace pingine.Main
             /* draw both the front and back of the polygon in fill mode,
              * as opposed to only the outlines (line) or the vertices (point) */
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
+
+            /* enable the option that makes opengl check the depth (z-azis)
+             * of every pixel it draws, it order to not draw things that 
+             * are supposed to be far-away on top of things that are supposed
+             * to be in the front of the screen */
+            GL.Enable(EnableCap.DepthTest);
+
+            /* it seems we don't need to explicitly create a projection
+             * matrix because it's in orthographic projection by default
+             * (position on the z-azis doesn't affect x and y coordinates) */
         }
 
         /* actions to do on window resize */
