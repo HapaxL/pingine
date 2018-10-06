@@ -44,13 +44,17 @@ namespace pingine.Main
         {
             // Title += " - OpenGL Version: " + GL.GetString(StringName.Version); // "4.6.0 NVIDIA 397.64" on my PC
 
+            Console.WriteLine("init_beforeshaderhandler " + GL.GetError());
             ShaderHandler = new ShaderHandler();
+            Console.WriteLine("init_aftershaderhandler " + GL.GetError());
             KeyboardHandler = new KeyboardHandler(false); // we don't want repeat enabled for a video game (except in menus or when writing something)
-            BackgroundColor = new ColorHSLA();
-            BackgroundColor.H = 0; // any hue
-            BackgroundColor.S = 1.0f; // full saturation
-            BackgroundColor.L = 0.5f; // half luminosity (not completely dark (black), not completely bright (white))
-            BackgroundColor.A = 1.0f; // full alpha channel (100% opaque)
+            BackgroundColor = new ColorHSLA
+            {
+                H = 0, // any hue
+                S = 1.0f, // full saturation
+                L = 0.5f, // half luminosity (not completely dark (black), not completely bright (white))
+                A = 1.0f // full alpha channel (100% opaque)
+            };
 
             /* bind our OnClosed actions to the closing event */
             Closed += OnClosed;
@@ -58,20 +62,30 @@ namespace pingine.Main
 
         private int CreateProgram()
         {
+            Console.WriteLine("createprog_first " + GL.GetError());
             /* the vertex shader is the first step in the rendering pipeline
              * takes each raw vertex attribute data specified beforehand,
              * processes them and generates a vertex as output */
             ShaderHandler.AddShader(ShaderType.VertexShader, Config.ResourceFolder + @"Shaders\vertex.shader");
-            
+
+            Console.WriteLine("createprog_aftervertexadd " + GL.GetError());
+
             /* the fragment shader is another step in the rendering pipeline
              * takes each fragment from the rasterization step, and outputs
              * a set of possible colors, a depth value, and a stencil (?) value
              * (i don't think we actually need a fragment shader? the only
              * one we need now is the one that applies texture on surfaces) */
             ShaderHandler.AddShader(ShaderType.FragmentShader, Config.ResourceFolder + @"Shaders\fragment.shader");
-            
+
+            Console.WriteLine("createprog_afterfragmentadd " + GL.GetError());
+
             /* create the pipeline program */
-            return ShaderHandler.CompileProgram();
+            var compile = ShaderHandler.CompileProgram();
+
+            Console.Write(compile + " ");
+            Console.WriteLine("createprog_aftercompile " + GL.GetError());
+
+            return compile;
         }
 
         /* actions to do on window (game) startup */
@@ -91,11 +105,15 @@ namespace pingine.Main
             
             RenderObjects.Add(new RenderObject(vertices));
 
-            ShaderProgramID = CreateProgram();
+            Console.WriteLine("load_afterrenderinit " + GL.GetError());
 
-            /* TODO figure this out because i have no idea what these do */
+            ShaderProgramID = CreateProgram();
+            
+            Console.WriteLine("load_afterprogcreate " + GL.GetError());
+
+            /* draw both the front and back of the polygon in fill mode,
+             * as opposed to only the outlines (line) or the vertices (point) */
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
-            GL.PatchParameter(PatchParameterInt.PatchVertices, 3);
         }
 
         /* actions to do on window resize */
@@ -123,7 +141,7 @@ namespace pingine.Main
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
             ProcessKeys(); // temporary (?) function for testing purposes?
-            BackgroundColor.H = (BackgroundColor.H + 0.002f) % 1;
+            BackgroundColor.H = (BackgroundColor.H + 0.002f) % 1; // changing background color o nevery frame for testing purposes
             // do the update logic here
 
             KeyboardHandler.ResetKeys(); // at the end of the update frame, we reset all keyboard trigger/release events
@@ -145,7 +163,7 @@ namespace pingine.Main
 
             if (KeyboardHandler.IsReleased(Key.E))
             {
-                Title += $": E was released";
+                Title += $": and E was finally released!";
             }
 
             if (KeyboardHandler.IsTriggered(Key.R))
@@ -172,6 +190,8 @@ namespace pingine.Main
         protected override void OnRenderFrame(FrameEventArgs e)
         {
             base.OnRenderFrame(e);
+            
+            Console.WriteLine("afterbase " + GL.GetError());
 
             /* get the time elapsed since last frame,
              * it's a surprise tool that will help us later */
@@ -182,15 +202,22 @@ namespace pingine.Main
             // background color
             Color4 backColor = BackgroundColor.ToRGBA();
 
+            Console.WriteLine("afterbgset " + GL.GetError());
+
             // applies the background color
             GL.ClearColor(backColor);
+            
+            Console.WriteLine("aftercolorclear " + GL.GetError());
 
             // clear the color buffer and the depth buffer (why? who knows lmao)
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            
+            Console.WriteLine("aftermaskclear " + GL.GetError());
 
             // tutorial stuff
-            /* this outputs some point or whatever thanks to
-             * the shader and the array data that we created on load */
+            /* we created a "program" earlier with CreateProgram()
+             * which describes the contents of the pipeline and what
+             * it will do to incoming input */
             GL.UseProgram(ShaderProgramID); // we choose to use our program in our pipeline
 
             /* the other entry point of the pipeline: attributes
@@ -201,22 +228,29 @@ namespace pingine.Main
              * the vertex shader and do some 1:1 mapping like "fs_color = color" or whatever */
             // GL.VertexAttrib4(0, position);
 
+            Console.WriteLine("afterproguse " + GL.GetError());
+
             /* vertex specification is the entry point of the pipeline
              * we declare things we want to draw, and which kind */
             foreach (var renderObject in RenderObjects)
+            {
                 renderObject.Render();
+            }
 
             /* we can apply some modifications to our primitives */
             // GL.PointSize(10); // change point size so that it's bigger than 1 pixel and we can see it
 
+            Console.WriteLine("afterrender " + GL.GetError());
 
             /* the scene is being drawn on the "back" buffer, which is hidden behind the "front" buffer
              * after we're finished drawing the scene on the back buffer, we use SwapBuffers()
              * so that the back buffer replaces the front buffer and displays the scene to the player
              * then the buffer previously in front becomes the back buffer and can be drawn on for the next frame
              * so this call is basically saying "we're done with drawing for this frame,
-             * let's display the result to the user */
+             * let's display the result to the user" */
             SwapBuffers();
+
+            Console.WriteLine("afterswap " + GL.GetError());
         }
 
         /* actions to do on window close */

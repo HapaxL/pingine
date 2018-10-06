@@ -1,4 +1,5 @@
 ﻿#version 150 core
+#extension GL_ARB_explicit_attrib_location: enable
 
 layout(location = 0) in vec4 position;
 layout(location = 1) in vec4 color;
@@ -9,5 +10,5 @@ void main(void)
     gl_Position = position;
     vs_color = color;
 
-	// gl_Position = vec4(0.25, -0.25, 0.5, 1.0);
+	// gl_Position = vec4(0.55, 0.25, 0.5, 1.0);
 }

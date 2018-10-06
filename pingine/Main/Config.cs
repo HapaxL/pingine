@@ -6,7 +6,7 @@ namespace pingine.Main
 {
     public static class Config
     {
-        public static string GameName = "Ghost Corridor";
+        public static string GameName = "Pingine Demo";
 
         public static int WindowWidth = 1280;
         public static int WindowHeight = 720;

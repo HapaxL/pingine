@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 
 namespace pingine.Main.Handlers
 {
@@ -12,7 +13,10 @@ namespace pingine.Main.Handlers
         public static void LogDebugInfo(string source, string log)
         {
             if (!string.IsNullOrWhiteSpace(log))
+            {
                 LogDebug($"DEBUG INFO {source}: {log}");
+                Console.WriteLine(source + ": " + log);
+            }
         }
     }
 }
