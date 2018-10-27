@@ -94,6 +94,8 @@ namespace pingine.Main.Handlers
 
             Console.WriteLine("renderobject_beforeloadimage" + GL.GetError());
 
+            /* load each sprite's image */
+            /* TODO: handle that ID thing */
             var id = 0;
             textures = sprites
                 .Select(s => LoadImage(shaderProgram, s.Bitmap, id))
@@ -115,6 +117,8 @@ namespace pingine.Main.Handlers
             /* bind that ID as a 2D texture */
             GL.BindTexture(TextureTarget.Texture2D, texID);
 
+            /* TODO explain this line
+             * (this line is mandatory for displaying textures) */
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) All.Linear);
 
             Console.WriteLine("loadimage_afterbindtexture " + GL.GetError());
@@ -150,11 +154,14 @@ namespace pingine.Main.Handlers
 
         public void Render(int program)
         {
+            /* is this necessary since we already do it at load? */
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, textures[0]);
 
             Console.WriteLine("render_afterbindtexture " + GL.GetError());
 
+            /* get location of variable in the shader that we will bind to
+             * a specific value for the duration of the shader's use */
             var texUniformLocation = GL.GetUniformLocation(program, "tex");
 
             Console.WriteLine("render_aftergetlocation " + GL.GetError());
@@ -216,11 +223,13 @@ namespace pingine.Main.Handlers
             {
                 if (initialized)
                 {
-                    /* TODO: use variables for the IDs (position, color) */
+                    /* TODO: use variables for the IDs (position, color, texcoords) */
                     /* TODO: factorize foreach vertex attribute */
                     GL.DisableVertexAttribArray(0);
                     GL.DisableVertexAttribArray(1);
+                    GL.DisableVertexAttribArray(2);
 
+                    /* delete our VAO(s) and our VBO(s) */
                     GL.DeleteVertexArray(vertexArray);
                     GL.DeleteBuffer(vertexBuffer);
                     initialized = false;

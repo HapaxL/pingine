@@ -263,10 +263,21 @@ public sealed class MainWindow : GameWindow
 
             Console.WriteLine("afterproguse " + GL.GetError());
 
+            /* TODO factorize!!!! */
+            /* this block of code is used to define an orthographic projection matrix,
+             * whose characteristics are that things don't get smaller when they're farther away,
+             * and distances are in pixels rather than in fractions of the screen's size.
+             * the matrix is sent to the vertex shader who will apply it on the vertices
+             * (hence why it needs to be called on every frame, after program use but before rendering */
+            /* this line creates the matrix */
             Matrix4 orthographicProjectionMatrix = Matrix4.CreateOrthographicOffCenter(0, Config.WindowWidth, Config.WindowHeight, 0, 0, 100);
+            /* does this line really need to be called on every frame,
+             * or only on window resize/other similar situations? */
             GL.Viewport(0, 0, Config.WindowWidth, Config.WindowHeight);
+            /* we get the location of the uniform that will hold our matrix in the vertex shader */
             var u = GL.GetUniformLocation(ShaderProgramID, "projection");
             Console.WriteLine("afteruniform " + GL.GetError());
+            /* we send the matrix to the shader */
             GL.UniformMatrix4(u, false, ref orthographicProjectionMatrix);
             Console.WriteLine("afterprojectionmatrix " + GL.GetError());
 
