@@ -111,7 +111,7 @@ public sealed class MainWindow : GameWindow
              * of every pixel it draws, it order to not draw things that 
              * are supposed to be far-away on top of things that are supposed
              * to be in the front of the screen */
-            GL.Enable(EnableCap.DepthTest);
+            // GL.Enable(EnableCap.DepthTest);
 
             /* enable blending, which is notably used to handle transparency */
             GL.Enable(EnableCap.Blend);
@@ -132,11 +132,13 @@ public sealed class MainWindow : GameWindow
             //    new Vertex(new Vector4(0f - 0.2f, 0.5f - 0.2f, 0.5f, 1.0f), new Color4(1.0f, 0f, 1.0f, 1.0f)),
             //};
 
-            var bitmap = new System.Drawing.Bitmap(@"E:\Code\Projects\pingine\pingine\Resources\sadcrash.png"); // DON'T FORGET TO CHANGE THIS PATH
+            var example1 = new System.Drawing.Bitmap(@"E:\Code\Projects\pingine\pingine\Resources\sadcrash.png"); // DON'T FORGET TO CHANGE THIS PATH
+            var example2 = new System.Drawing.Bitmap(@"E:\Code\Projects\pingine\pingine\Resources\bitch_of_an_earth.png");
 
             Sprite[] sprites =
             {
-                new Sprite(bitmap, new Vector2(200, 50), new Vector2(bitmap.Size.Width, bitmap.Size.Height), 0),
+                new Sprite(example1, new Vector2(200, 50), new Vector2(example1.Size.Width, example1.Size.Height), 0),
+                new Sprite(example2, new Vector2(180, 150), new Vector2(example2.Size.Width, example2.Size.Height), 0),
             };
             
             ShaderProgramID = CreateProgram();
@@ -270,7 +272,7 @@ public sealed class MainWindow : GameWindow
              * the matrix is sent to the vertex shader who will apply it on the vertices
              * (hence why it needs to be called on every frame, after program use but before rendering */
             /* this line creates the matrix */
-            Matrix4 orthographicProjectionMatrix = Matrix4.CreateOrthographicOffCenter(0, Config.WindowWidth, Config.WindowHeight, 0, 0, 100);
+            Matrix4 orthographicProjectionMatrix = Matrix4.CreateOrthographicOffCenter(0, Config.WindowWidth, Config.WindowHeight, 0, 0, -100);
             /* does this line really need to be called on every frame,
              * or only on window resize/other similar situations? */
             GL.Viewport(0, 0, Config.WindowWidth, Config.WindowHeight);
