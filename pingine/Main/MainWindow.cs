@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
@@ -7,10 +8,20 @@ using OpenTK.Input;
 using pingine.Main.Graphics;
 using pingine.Main.Handlers;
 
+/******************************************************\
+* Simple, cross-platform 2D engine for OpenTK.NetCore. *
+*              (C) Hapax - MIT License                 *
+\******************************************************/
+
+/* IMPORTANT NOTE: dependencies include System.Drawing.Common which requires libgdiplus
+ * (or mono-libgdiplus?) in order to function correctly on Linux and Mac. 
+ * source: https://github.com/dotnet/corefx/issues/20712 
+ * more info: https://github.com/mellinoe/corefx/commit/48e96d5ac2e51a7a388aa5d066c9f516faa22e2d */
+
 namespace pingine.Main
 {
     /* main game window that also handles game logic */
-    public sealed class MainWindow : GameWindow
+public sealed class MainWindow : GameWindow
     {
         ShaderHandler ShaderHandler;
         KeyboardHandler KeyboardHandler;
@@ -72,9 +83,8 @@ namespace pingine.Main
 
             /* the fragment shader is another step in the rendering pipeline
              * takes each fragment from the rasterization step, and outputs
-             * a set of possible colors, a depth value, and a stencil (?) value
-             * (i don't think we actually need a fragment shader? the only
-             * one we need now is the one that applies texture on surfaces) */
+             * a set of possible colors, a depth value, and a stencil (?) value */
+            /* this is the shader that handles colors and textures for vertices */
             ShaderHandler.AddShader(ShaderType.FragmentShader, Config.ResourceFolder + @"Shaders\fragment.shader");
 
             Console.WriteLine("createprog_afterfragmentadd " + GL.GetError());
@@ -92,27 +102,6 @@ namespace pingine.Main
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            
-            Vertex[] vertices =
-            {
-                new Vertex(new Vector4(0f, 0f, 0f, 1.0f), new Color4(1.0f, 0f, 0f, 1.0f)),
-                new Vertex(new Vector4(0.5f, 0f, 0f, 1.0f), new Color4(0f, 1.0f, 0f, 1.0f)),
-                new Vertex(new Vector4(0.5f, 0.5f, 0f, 1.0f), new Color4(0f, 0f, 1.0f, 1.0f)),
-                new Vertex(new Vector4(0f, 0.5f, 0f, 1.0f), new Color4(1.0f, 0f, 1.0f, 1.0f)),
-
-                new Vertex(new Vector4(0f - 0.2f, 0f - 0.2f, 0.5f, 1.0f), new Color4(1.0f, 0f, 0f, 1.0f)),
-                new Vertex(new Vector4(0.5f - 0.2f, 0f - 0.2f, 0.5f, 1.0f), new Color4(0f, 1.0f, 0f, 1.0f)),
-                new Vertex(new Vector4(0.5f - 0.2f, 0.5f - 0.2f, 0.5f, 1.0f), new Color4(0f, 0f, 1.0f, 1.0f)),
-                new Vertex(new Vector4(0f - 0.2f, 0.5f - 0.2f, 0.5f, 1.0f), new Color4(1.0f, 0f, 1.0f, 1.0f)),
-            };
-            
-            RenderObjects.Add(new RenderObject(vertices));
-
-            Console.WriteLine("load_afterrenderinit " + GL.GetError());
-
-            ShaderProgramID = CreateProgram();
-            
-            Console.WriteLine("load_afterprogcreate " + GL.GetError());
 
             /* draw both the front and back of the polygon in fill mode,
              * as opposed to only the outlines (line) or the vertices (point) */
@@ -124,15 +113,46 @@ namespace pingine.Main
              * to be in the front of the screen */
             GL.Enable(EnableCap.DepthTest);
 
-            /* it seems we don't need to explicitly create a projection
-             * matrix because it's in orthographic projection by default
-             * (position on the z-azis doesn't affect x and y coordinates) */
+            /* enable blending, which is notably used to handle transparency */
+            GL.Enable(EnableCap.Blend);
+            /* this defines what the blending function does, the standard values
+             * for regular transparency are (SrcAlpha, OneMinusSrcAlpha) */
+            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+
+            //Vertex[] vertices =
+            //{
+            //    new Vertex(new Vector4(0f, 0f, 0f, 1.0f), new Color4(1.0f, 0f, 0f, 1.0f)),
+            //    new Vertex(new Vector4(0.5f, 0f, 0f, 1.0f), new Color4(0f, 1.0f, 0f, 1.0f)),
+            //    new Vertex(new Vector4(0.5f, 0.5f, 0f, 1.0f), new Color4(0f, 0f, 1.0f, 1.0f)),
+            //    new Vertex(new Vector4(0f, 0.5f, 0f, 1.0f), new Color4(1.0f, 0f, 1.0f, 1.0f)),
+
+            //    new Vertex(new Vector4(0f - 0.2f, 0f - 0.2f, 0.5f, 1.0f), new Color4(1.0f, 0f, 0f, 1.0f)),
+            //    new Vertex(new Vector4(0.5f - 0.2f, 0f - 0.2f, 0.5f, 1.0f), new Color4(0f, 1.0f, 0f, 1.0f)),
+            //    new Vertex(new Vector4(0.5f - 0.2f, 0.5f - 0.2f, 0.5f, 1.0f), new Color4(0f, 0f, 1.0f, 1.0f)),
+            //    new Vertex(new Vector4(0f - 0.2f, 0.5f - 0.2f, 0.5f, 1.0f), new Color4(1.0f, 0f, 1.0f, 1.0f)),
+            //};
+
+            var bitmap = new System.Drawing.Bitmap(@"E:\Code\Projects\pingine\pingine\Resources\sadcrash.png"); // DON'T FORGET TO CHANGE THIS PATH
+
+            Sprite[] sprites =
+            {
+                new Sprite(bitmap, new Vector2(200, 50), new Vector2(bitmap.Size.Width, bitmap.Size.Height), 0),
+            };
+            
+            ShaderProgramID = CreateProgram();
+
+            Console.WriteLine("load_afterprogcreate " + GL.GetError());
+
+            // RenderObjects.Add(new RenderObject(sprites));
+            RenderObjects.Add(new RenderObject(ShaderProgramID, sprites));
+
+            Console.WriteLine("load_afterrenderinit " + GL.GetError());
         }
 
         /* actions to do on window resize */
         protected override void OnResize(EventArgs e)
         {
-            GL.Viewport(0, 0, Width, Height); // we reset the viewport which i'm not sure is something we want? to be investigated
+            // TODO: find a way to have the game work well with window resizes (maybe prevent resizing?)
         }
 
         /* adding keyboard handling logic, we probably don't want to add anything else in here */
@@ -203,7 +223,7 @@ namespace pingine.Main
         protected override void OnRenderFrame(FrameEventArgs e)
         {
             base.OnRenderFrame(e);
-            
+
             Console.WriteLine("afterbase " + GL.GetError());
 
             /* get the time elapsed since last frame,
@@ -243,16 +263,22 @@ namespace pingine.Main
 
             Console.WriteLine("afterproguse " + GL.GetError());
 
+            Matrix4 orthographicProjectionMatrix = Matrix4.CreateOrthographicOffCenter(0, Config.WindowWidth, Config.WindowHeight, 0, 0, 100);
+            GL.Viewport(0, 0, Config.WindowWidth, Config.WindowHeight);
+            var u = GL.GetUniformLocation(ShaderProgramID, "projection");
+            Console.WriteLine("afteruniform " + GL.GetError());
+            GL.UniformMatrix4(u, false, ref orthographicProjectionMatrix);
+            Console.WriteLine("afterprojectionmatrix " + GL.GetError());
+
             /* vertex specification is the entry point of the pipeline
              * we declare things we want to draw, and which kind */
             foreach (var renderObject in RenderObjects)
             {
-                renderObject.Render();
+                renderObject.Render(ShaderProgramID);
             }
 
             /* we can apply some modifications to our primitives */
             // GL.PointSize(10); // change point size so that it's bigger than 1 pixel and we can see it
-
             Console.WriteLine("afterrender " + GL.GetError());
 
             /* the scene is being drawn on the "back" buffer, which is hidden behind the "front" buffer
