@@ -10,7 +10,7 @@ out vec4 fs_color;
 
 void main(void)
 {
-	fs_color = texture(tex, vs_texcoord); // *vs_color;
+	fs_color = texture(tex, vs_texcoord); // * vs_color;
 	// fs_color = vs_color;
 	// color = vec4(1.0, 0.0, 0.0, 1.0);
 }

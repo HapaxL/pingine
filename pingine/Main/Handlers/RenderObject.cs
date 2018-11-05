@@ -6,6 +6,7 @@ using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using pingine.Main.Graphics;
 using System.Collections.Generic;
+using HapaxTools;
 
 namespace pingine.Main.Handlers
 {
@@ -22,6 +23,7 @@ namespace pingine.Main.Handlers
 
         public RenderObject(int shaderProgram, Sprite[] sprites)
         {
+            var test = new SortedMultiset<int, int, Sprite>();
             // spriteCount = sprites.Length;
             var vertices = sprites
                 // .SelectMany(s => s.Points.Select(p => p.ToVector()))
@@ -46,7 +48,7 @@ namespace pingine.Main.Handlers
             /* populate our buffer with raw data */
             GL.BufferData(
                 BufferTarget.ArrayBuffer,               // target buffer object (can either be ArrayBuffer or ElementArrayBuffer, no idea what the latter does)
-                (Vector3.SizeInBytes + (sizeof(float) * 4) + Vector2.SizeInBytes) * verticeCount,     // specify the size of the data
+                (Vector2.SizeInBytes + (sizeof(float) * 4) + Vector2.SizeInBytes) * verticeCount,     // specify the size of the data
                 vertices,                               // our data!
                 BufferUsageHint.StaticDraw);            /* hint at OpenGL how the data might be accessed, for optimization purposes
                                                          * StaticDraw = the data will be modified once and used many times
@@ -69,10 +71,10 @@ namespace pingine.Main.Handlers
              * each call to GL.VertexAttribPointer describes a separate attribute */
             GL.VertexAttribPointer(
                 positionIndex,          // index of the first attribute (same as GL.EnableVertexAttribArray)
-                3,                      // size of the attribute (we want 3 because we have a vec3)
+                2,                      // size of the attribute (we want 2 because we have a vec2)
                 VertexAttribPointerType.Float, // contains floats
                 false,                  // does not need to be normalized as it is already, floats ignore this flag anyway
-                Vector3.SizeInBytes + (sizeof(float) * 4) + Vector2.SizeInBytes,            // different values for the same attribute are separated by the size of a vertex
+                Vector2.SizeInBytes + (sizeof(float) * 4) + Vector2.SizeInBytes,            // different values for the same attribute are separated by the size of a vertex
                 0);                     // starting position of the data (first data so position 0)
 
             
@@ -81,8 +83,8 @@ namespace pingine.Main.Handlers
                 4,                      // size of the attribute (we want 4 because we have a vec4)
                 VertexAttribPointerType.Float, // contains floats
                 false,                  // does not need to be normalized as it is already, floats ignore this flag anyway
-                Vector3.SizeInBytes + (sizeof(float) * 4) + Vector2.SizeInBytes,            // different values for the same attribute are separated by the size of a vertex
-                Vector3.SizeInBytes);   // starting position of the data (comes after a vec4)
+                Vector2.SizeInBytes + (sizeof(float) * 4) + Vector2.SizeInBytes,            // different values for the same attribute are separated by the size of a vertex
+                Vector2.SizeInBytes);   // starting position of the data (comes after a vec4)
 
 
             GL.VertexAttribPointer(
@@ -90,8 +92,8 @@ namespace pingine.Main.Handlers
                 2,
                 VertexAttribPointerType.Float,
                 false,
-                Vector3.SizeInBytes + (sizeof(float) * 4) + Vector2.SizeInBytes,
-                Vector3.SizeInBytes + (sizeof(float) * 4));
+                Vector2.SizeInBytes + (sizeof(float) * 4) + Vector2.SizeInBytes,
+                Vector2.SizeInBytes + (sizeof(float) * 4));
 
             Console.WriteLine("renderobject_beforeloadimage" + GL.GetError());
 

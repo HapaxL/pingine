@@ -111,7 +111,12 @@ public sealed class MainWindow : GameWindow
              * of every pixel it draws, it order to not draw things that 
              * are supposed to be far-away on top of things that are supposed
              * to be in the front of the screen */
+            /* we are going to use a render queue in order to draw each
+             * sprite in the correct order from background to foreground,
+             * so we don't need to enable depthtest or alphatest anymore */
             // GL.Enable(EnableCap.DepthTest);
+            // GL.Enable(EnableCap.AlphaTest);
+            // GL.AlphaFunc(AlphaFunction.Greater, 0);
 
             /* enable blending, which is notably used to handle transparency */
             GL.Enable(EnableCap.Blend);
@@ -119,26 +124,13 @@ public sealed class MainWindow : GameWindow
              * for regular transparency are (SrcAlpha, OneMinusSrcAlpha) */
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 
-            //Vertex[] vertices =
-            //{
-            //    new Vertex(new Vector4(0f, 0f, 0f, 1.0f), new Color4(1.0f, 0f, 0f, 1.0f)),
-            //    new Vertex(new Vector4(0.5f, 0f, 0f, 1.0f), new Color4(0f, 1.0f, 0f, 1.0f)),
-            //    new Vertex(new Vector4(0.5f, 0.5f, 0f, 1.0f), new Color4(0f, 0f, 1.0f, 1.0f)),
-            //    new Vertex(new Vector4(0f, 0.5f, 0f, 1.0f), new Color4(1.0f, 0f, 1.0f, 1.0f)),
-
-            //    new Vertex(new Vector4(0f - 0.2f, 0f - 0.2f, 0.5f, 1.0f), new Color4(1.0f, 0f, 0f, 1.0f)),
-            //    new Vertex(new Vector4(0.5f - 0.2f, 0f - 0.2f, 0.5f, 1.0f), new Color4(0f, 1.0f, 0f, 1.0f)),
-            //    new Vertex(new Vector4(0.5f - 0.2f, 0.5f - 0.2f, 0.5f, 1.0f), new Color4(0f, 0f, 1.0f, 1.0f)),
-            //    new Vertex(new Vector4(0f - 0.2f, 0.5f - 0.2f, 0.5f, 1.0f), new Color4(1.0f, 0f, 1.0f, 1.0f)),
-            //};
-
             var example1 = new System.Drawing.Bitmap(@"E:\Code\Projects\pingine\pingine\Resources\sadcrash.png"); // DON'T FORGET TO CHANGE THIS PATH
             var example2 = new System.Drawing.Bitmap(@"E:\Code\Projects\pingine\pingine\Resources\bitch_of_an_earth.png");
 
             Sprite[] sprites =
             {
                 new Sprite(example1, new Vector2(200, 50), new Vector2(example1.Size.Width, example1.Size.Height), 0),
-                new Sprite(example2, new Vector2(180, 150), new Vector2(example2.Size.Width, example2.Size.Height), 0),
+                new Sprite(example2, new Vector2(180, 150), new Vector2(example2.Size.Width, example2.Size.Height), 1),
             };
             
             ShaderProgramID = CreateProgram();

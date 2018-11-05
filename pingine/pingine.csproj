@@ -10,4 +10,14 @@
     <PackageReference Include="System.Drawing.Common" Version="4.5.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Main\Util\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="HapaxTools">
+      <HintPath>..\..\HapaxTools\HapaxTools\bin\Release\netcoreapp2.1\HapaxTools.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>
