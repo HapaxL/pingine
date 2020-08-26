@@ -11,13 +11,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Main\Util\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Reference Include="HapaxTools">
       <HintPath>..\..\HapaxTools\HapaxTools\bin\Release\netcoreapp2.1\HapaxTools.dll</HintPath>
     </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Game\Graphics\SpriteSets\" />
+    <Folder Include="Game\Physics\" />
+    <Folder Include="Game\Render\Data\" />
   </ItemGroup>
 
 </Project>

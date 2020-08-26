@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using OpenTK.Graphics;
+﻿using OpenTK.Graphics;
 
-namespace pingine.Main.Graphics
+namespace pingine.Game.Graphics
 {
     /* encodes a color in Hue, Saturation, Lightness, Alpha format
      * equivalent of OpenTK's Color4 but in HSLA instead of RGBA

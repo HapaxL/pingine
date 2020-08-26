@@ -1,0 +1,59 @@
+
+
+
+an entity is associated with a sprite which is a combination of data which leads to a set of available textures for the entity
+	- do we do simple and say entity = set of textures that will always be loaded?
+		simple to understand, jsut make different entities for the same "thing" if it holds different sets of behaviours
+	- or do we associate sets of textures with behaviours which can then be activated/deactivated in an entity depending on scenes?
+		more complicated to handle BUT allows to factorize behaviours for a single "thing"
+		for example, if the "player-controlled" entity is the main character in a regular scene, but becomes a cursor in a menu, then there'd only be one entity but its behaviours would differ
+
+
+
+
+
+
+
+
+
+textures are loaded into the memory through IDs
+-> we want textures that are always used to stay loaded
+-> we want to load/unload textures only during transitions (loading screens) and not everytime something happens
+-> textures come in sets:
+	- set of textures for one sprite (either one or several for an animated sprite)
+
+- transition: where we load/unload textures
+- scene: set of textures that may appear at any time within two transitions
+- a scene contains several subsets of textures (example: tileset for a certain map, spriteset for a certain character/NPC being on the map, etc)
+- gotta handle a set of textures not being reset during a transition (important because many textures will stay on most of the time, like HUD, pause menus, main character, etc)
+- gotta handle things being loaded(/unloaded?) on the fly (we can do that later)
+- pause menus are not a different scene because they don't trigger a load/unload
+	-> maybe have "scene" be a subset of textures rather than a set? which means the current state a game is in would be a set of scenes? that probably would make it harder to understand
+	-> if not, then find a term for this concept of a subset of textures (pause menu) (could it be what an entity is?)
+	-> a pause menu changes the behaviour of the whole game, should it be considered a "loop" altogether?
+		the way things are rendered stays the same, so only the update loop changes
+		that would mean "update loop" is another concept that has to be handled separately from textures/scenes: indeed, player inputs would be handled differently as well
+- 
+
+how to handle the time stop aspect of a pause menu?
+	having every entity (that's not part of the pause menu) stop individually (by using an additional argument or by stopping the ingame timer or both) is a bit bothersome
+	having the entire call to update all entities in specific scenes (like the "ingame" scene) would work better probably but dev mistakes might be more frequent (forgetting to timestop a specific secondary scene for example, like player state or something (assuming we make that a separate scene)...)
+
+menu time counted as IGT?
+	=> both can be desirable for a dev, so both should be available in the engine! plus you wouldn't want a title screen menu to count as IGT because that wouldn't make sense
+
+
+you want the engine to be simplistic and THEN provide useful premade elements for specific genres
+	=> don't overthink it!
+- sets of textures need to be rendered -> scene
+- textures need to be loaded/unloaded -> transitions
+- some textures don't need to be unloaded then loaded again -> subsets of textures
+- transition = unload some subsets, load others, keep some loaded
+- game = global state that contains all the stuff that stays on throughout the... game (render handler, program, scenes, and so on)
+- scene = set of textures and behaviours, needs to be loaded then activated, then deactivated then unloaded
+- several scenes can be loaded and activated at the same time
+- how do you pass "messages"/behaviours to other scenes??? (examples: triggering a transition, pause menu actually pausing the rest of the game, etc)
+	=> game actions: ask game to send "action" (int? string? enum?) to each scene for them to "resolve" it
+	=> scenes resolve actions: scenes have a resolve method where they are asked to resolve all the actions the game can send them?
+	=> the game only asks for the next scenes in the list for resolution? or all of them? including the scene that sent the action? or waits for the next cycle to resolve the action on previous scenes?
+- scenes have priorities: when you load a scene you give it a priority which tells the game in which order to run its scenes

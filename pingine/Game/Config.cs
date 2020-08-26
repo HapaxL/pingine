@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using pingine.Game.Handlers;
 
-namespace pingine.Main
+namespace pingine.Game
 {
     public static class Config
     {
@@ -13,8 +11,10 @@ namespace pingine.Main
 
         /* updates (to the game logic) per second
          * we want a fixed amount so that the game never increases/decreases in speed */
-        public static int UPS = 60; 
+        public static int UPS = 60;
 
         public static string ResourceFolder = @"E:\Code\Projects\pingine\pingine\Resources\";
+
+        public static SceneId StartScene = SceneId.Test;
     }
 }

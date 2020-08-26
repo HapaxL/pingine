@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using OpenTK.Input;
 
-namespace pingine.Main.Handlers
+namespace pingine.Game.Handlers
 {
     /* OpenTK's KeyboardState does not work (keyboard always disconnected).
      * I use this handler to circumvent this issue and have my own KeyboardState functionality */
