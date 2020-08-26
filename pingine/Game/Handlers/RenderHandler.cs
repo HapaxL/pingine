@@ -10,7 +10,7 @@ using ProgramId = System.Int32;
 using System.Collections.Generic;
 using pingine.Game.State;
 
-namespace pingine.Game.Render
+namespace pingine.Game.Handlers
 {
     public class RenderHandler : IDisposable
     {
@@ -221,7 +221,7 @@ namespace pingine.Game.Render
              * (this line is mandatory for displaying textures)
              * also needs to be called once per texture, after you bind it */
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)All.Linear);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)All.Linear);
+            // GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)All.Linear);
 
             /* this is a System.Drawing(.Common) operation: lock our bitmap in
              * system memory so that we can access the data programmatically */

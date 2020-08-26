@@ -19,7 +19,6 @@
   <ItemGroup>
     <Folder Include="Game\Graphics\SpriteSets\" />
     <Folder Include="Game\Physics\" />
-    <Folder Include="Game\Render\Data\" />
   </ItemGroup>
 
 </Project>

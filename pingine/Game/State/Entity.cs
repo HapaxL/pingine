@@ -1,7 +1,5 @@
 ﻿using OpenTK;
-using pingine.Game.Util;
 using pingine.Game.Graphics;
-using pingine.Game.Render;
 using OpenTK.Graphics;
 
 using TexId = System.Int32;

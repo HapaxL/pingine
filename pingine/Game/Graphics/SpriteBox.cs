@@ -1,6 +1,4 @@
-﻿using OpenTK;
-
-namespace pingine.Game.Graphics
+﻿namespace pingine.Game.Graphics
 {
     public struct SpriteBox
     {
