@@ -1,5 +1,6 @@
 ﻿using pingine.Game.Graphics;
 using pingine.Game.Handlers;
+using pingine.Game.State;
 using pingine.Game.Util;
 using System;
 using System.Collections.Generic;
@@ -20,6 +21,8 @@ namespace pingine.Game
         public static RenderHandler RenderHandler { get; private set; }
         public static SceneHandler SceneHandler { get; private set; }
 
+        public static Camera Camera { get; private set; }
+
         public static Dictionary<string, SpriteSet> SpriteSets { get; private set; }
 
         public static MainWindow Window { get; private set; }
@@ -34,7 +37,6 @@ namespace pingine.Game
             ShaderHandler = new ShaderHandler();
             KeyboardHandler = new KeyboardHandler(false); // we don't want repeat enabled for a video game (except in menus or when writing something)
             ResourceHandler = new ResourceHandler();
-
             switch (Config.TextureDisplayMode)
             {
                 case TextureDisplayMode.Smooth:
@@ -45,6 +47,8 @@ namespace pingine.Game
                     break;
             }
             SceneHandler = new SceneHandler();
+
+            Camera = new Camera(50, 100);
 
             SpriteSets = new Dictionary<string, SpriteSet>
             {

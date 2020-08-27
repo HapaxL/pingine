@@ -139,11 +139,26 @@ namespace pingine.Game.Handlers
                                                          * DynamicDraw = the data will be modified many times and used many times */
                                                         /* this does not actually change a lot, so whatever */
 
-            /* get location of variable in the shader that we will bind to
-             * a specific value for the duration of the shader's use */
+            /* get location of variables in the shader that we will bind to
+             * specific values for the duration of the shader's use */
             var texUniformLocation = GL.GetUniformLocation(program, "tex");
+            var cameraUniformLocation = GL.GetUniformLocation(program, "camera");
 
             Game.LogHandler.LogGLError("render_aftergetlocation", GL.GetError());
+
+            /* whenever we want the fragment (texture) shader to execute
+             * operations on more than one "texture unit" (mashing together
+             * two textures on a single sprite for example) we will need
+             * to specify texture unit IDs, thanks to uniforms.
+             * the default value of 0 works fine since we're always using
+             * 0 as our active texture. the line below gets the location
+             * of a uniform by its name, and assigns a value to it. */
+            GL.Uniform1(texUniformLocation, 0);
+            /* camera coordinates are sent to the shader on every rendering call so that every element in
+             * the game can be shifted in the same direction to give the illusion that the camera is moving */
+            GL.Uniform2(cameraUniformLocation, Game.Camera.X, Game.Camera.Y);
+
+            Game.LogHandler.LogGLError("render_afteruniform", GL.GetError());
 
             var verticesDrawn = 0;
 
@@ -153,17 +168,6 @@ namespace pingine.Game.Handlers
                 GL.BindTexture(TextureTarget.Texture2D, o.TexId.Value);
 
                 Game.LogHandler.LogGLError("render_afterbindtexture", GL.GetError());
-                
-                /* whenever we want the fragment (texture) shader to execute
-                 * operations on more than one "texture unit" (mashing together
-                 * two textures on a single sprite for example) we will need
-                 * to specify texture unit IDs, thanks to uniforms.
-                 * the default value of 0 works fine since we're always using
-                 * 0 as our active texture. the line below gets the location
-                 * of a uniform by its name, and assigns a value to it. */
-                GL.Uniform1(texUniformLocation, 0);
-
-                Game.LogHandler.LogGLError("render_afteruniform", GL.GetError());
 
                 /* we specify that we want to take <count> VAO from our (active) vertex array(s),
                  * starting at index <first>, and treat it as a <mode>

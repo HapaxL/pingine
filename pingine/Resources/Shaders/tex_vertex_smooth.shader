@@ -6,13 +6,14 @@ layout(location = 0) in vec2 position;
 layout(location = 1) in ivec2 texcoord;
 
 uniform mat4 projection;
+uniform vec2 camera;
 
 //out vec4 vs_color;
 out vec2 vs_texcoord;
 
 void main(void)
 {
-	gl_Position = projection * vec4(position, 0, 1);
+	gl_Position = projection * vec4(position - camera, 0, 1);
 	//vs_color = color;
 	vs_texcoord = texcoord;
 
