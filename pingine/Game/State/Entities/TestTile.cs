@@ -2,8 +2,8 @@
 {
     public class TestTile : Entity
     {
-        public TestTile(int baseX, int baseY, int spriteId)
-            : base(baseX, baseY, 0, "tileset1", spriteId, 0)
+        public TestTile(int baseX, int baseY, int depth, int spriteId)
+            : base(baseX, baseY, depth, "tileset1", Game.RNG.Next(6), 0)
         { }
 
         public override void Update()

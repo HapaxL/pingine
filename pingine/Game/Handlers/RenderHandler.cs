@@ -12,7 +12,7 @@ using pingine.Game.State;
 
 namespace pingine.Game.Handlers
 {
-    public class RenderHandler : IDisposable
+    public abstract class RenderHandler : IDisposable
     {
         private bool initialized;
         private bool disposed;
@@ -23,10 +23,23 @@ namespace pingine.Game.Handlers
         private readonly OrderedMultiset<float, ulong, Entity> toRender;
         private readonly HashSet<Entity> toUpdate;
 
+        /* define indexes for our vertex attributes
+         * TODO: we should name these attribute locations by using GL.BindAttribLocation(program, index, name)
+         * and then fetch them back by using GL.GetAttribLocation(program, name) in order to use them as arguments
+         * for these calls to GL.EnableVertexAttribArray */
+        private readonly int positionIndex;
+        // private readonly int colorIndex;
+        private readonly int texCoordIndex;
+        private readonly int renderDataSize;
+
         public RenderHandler()
         {
             toRender = new OrderedMultiset<float, ulong, Entity>();
             toUpdate = new HashSet<Entity>();
+            positionIndex = 0;
+            // colorIndex = 1;
+            texCoordIndex = 1;
+            renderDataSize = Vector2.SizeInBytes /*+ (sizeof(float) * 4)*/ + (sizeof(int) * 2);
         }
 
         public void Load()
@@ -45,41 +58,21 @@ namespace pingine.Game.Handlers
             /* make the VBO active in our OpenGL context */
             GL.BindBuffer(BufferTarget.ArrayBuffer, VertexBuffer);
 
-            // /* populate our buffer with raw data */
-            //GL.BufferData(
-            //    BufferTarget.ArrayBuffer,               // target buffer object (can either be ArrayBuffer or ElementArrayBuffer, no idea what the latter does)
-            //    (Vector2.SizeInBytes + (sizeof(float) * 4) + Vector2.SizeInBytes) * verticeCount,     // specify the size of the data
-            //    vertices,                               // our data!
-            //    BufferUsageHint.StaticDraw);            /* hint at OpenGL how the data might be accessed, for optimization purposes
-            //                                             * StaticDraw = the data will be modified once and used many times
-            //                                             * DynamicDraw = the data will be modified many times and used many times */
-
-            /* define indexes for our vertex attributes
-             * TODO: we should name these attribute locations by using GL.BindAttribLocation(program, index, name)
-             * and then fetch them back by using GL.GetAttribLocation(program, name) in order to use them as arguments
-             * for these calls to GL.EnableVertexAttribArray */
-            int positionIndex = 0;
-            int colorIndex = 1;
-            int texCoordIndex = 2;
-
             /* Enable the vertex attributes */
             GL.EnableVertexAttribArray(positionIndex);
-            GL.EnableVertexAttribArray(colorIndex);
+            //GL.EnableVertexAttribArray(colorIndex);
             GL.EnableVertexAttribArray(texCoordIndex);
 
-            var dataSize = Vector2.SizeInBytes + (sizeof(float) * 4) + (sizeof(int) * 2);
-
-            /* describe how to read the raw data we just passed with GL.BufferData
+            /* describe how to read the raw data we pass with GL.BufferData
              * each call to GL.VertexAttribPointer describes a separate attribute */
             GL.VertexAttribPointer(
                 positionIndex,          // index of the first attribute (same as GL.EnableVertexAttribArray)
                 2,                      // size of the attribute (we want 2 because we have a vec2)
                 VertexAttribPointerType.Float, // contains floats
                 false,                  // does not need to be normalized as it is already, floats ignore this flag anyway
-                dataSize,               // different values for the same attribute are separated by the size of a vertex
+                renderDataSize,               // different values for the same attribute are separated by the size of a vertex
                 0);                     // starting position of the data (first data so position 0)
-
-            
+            /*
             GL.VertexAttribPointer(
                 colorIndex,             // index of the second attribute (same as GL.EnableVertexAttribArray)
                 4,                      // size of the attribute (we want 4 because we have a vec4)
@@ -87,15 +80,14 @@ namespace pingine.Game.Handlers
                 false,                  // does not need to be normalized as it is already, floats ignore this flag anyway
                 dataSize,               // different values for the same attribute are separated by the size of a vertex
                 Vector2.SizeInBytes);   // starting position of the data (comes after a vec2)
-
-
+            */
             GL.VertexAttribIPointer(
                 texCoordIndex,
                 2,
                 VertexAttribIntegerType.Int,
-                // false,                  // normalizing transforms integer values in the 0-255 range into float values in the 0-1 range. set to false cuz we want ints
-                dataSize,
-                new IntPtr(Vector2.SizeInBytes + (sizeof(float) * 4)));
+                // false,               // normalizing transforms integer values in the 0-255 range into float values in the 0-1 range. set to false cuz we want ints
+                renderDataSize,
+                new IntPtr(Vector2.SizeInBytes /* + (sizeof(float) * 4)) */ ));
 
             Game.LogHandler.LogGLError("renderobject_beforeloadimage", GL.GetError());
 
@@ -140,7 +132,7 @@ namespace pingine.Game.Handlers
             /* populate our buffer with raw data */
             GL.BufferData(
                 BufferTarget.ArrayBuffer,               // target buffer object (can either be ArrayBuffer or ElementArrayBuffer, no idea what the latter does)
-                (Vector2.SizeInBytes + (sizeof(float) * 4) + Vector2.SizeInBytes) * vertices.Length,     // specify the size of the data
+                renderDataSize * vertices.Length,     // specify the size of the data
                 vertices,                               // our data!
                 BufferUsageHint.StaticDraw);            /* hint at OpenGL how the data might be accessed, for optimization purposes
                                                          * StaticDraw = the data will be modified once and used many times
@@ -201,6 +193,8 @@ namespace pingine.Game.Handlers
             }
         }
 
+        public abstract void SetTexParameters();
+
         /* load an image in the graphics card's memory */
         public TexId LoadBitmap(System.Drawing.Bitmap bitmap)
         {
@@ -217,12 +211,8 @@ namespace pingine.Game.Handlers
 
             Game.LogHandler.LogGLError("loadimage_afterbindtexture", GL.GetError());
 
-            /* TODO explain this line
-             * (this line is mandatory for displaying textures)
-             * also needs to be called once per texture, after you bind it */
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)All.Linear);
-            // GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)All.Linear);
-
+            SetTexParameters();
+            
             /* this is a System.Drawing(.Common) operation: lock our bitmap in
              * system memory so that we can access the data programmatically */
             BitmapData data = bitmap.LockBits(new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height),

@@ -2,6 +2,12 @@
 
 namespace pingine.Game
 {
+    public enum TextureDisplayMode
+    {
+        PixelPerfect,
+        Smooth,
+    }
+
     public static class Config
     {
         public static string GameName = "Pingine Demo";
@@ -16,5 +22,7 @@ namespace pingine.Game
         public static string ResourceFolder = @"E:\Code\Projects\pingine\pingine\Resources\";
 
         public static SceneId StartScene = SceneId.Test;
+
+        public static TextureDisplayMode TextureDisplayMode = TextureDisplayMode.PixelPerfect;
     }
 }

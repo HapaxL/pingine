@@ -74,7 +74,15 @@ namespace pingine.Game
             /* the vertex shader is the first step in the rendering pipeline
              * takes each raw vertex attribute data specified beforehand,
              * processes them and generates a vertex as output */
-            Game.ShaderHandler.AddShader(ShaderType.VertexShader, Config.ResourceFolder + @"Shaders\tex_vertex.shader");
+            switch (Config.TextureDisplayMode)
+            {
+                case TextureDisplayMode.Smooth:
+                    Game.ShaderHandler.AddShader(ShaderType.VertexShader, Config.ResourceFolder + @"Shaders\tex_vertex_smooth.shader");
+                    break;
+                default:
+                    Game.ShaderHandler.AddShader(ShaderType.VertexShader, Config.ResourceFolder + @"Shaders\tex_vertex_pixelperfect.shader");
+                    break;
+            }
 
             Game.LogHandler.LogGLError("createprog_aftervertexadd", GL.GetError());
 

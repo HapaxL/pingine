@@ -34,7 +34,16 @@ namespace pingine.Game
             ShaderHandler = new ShaderHandler();
             KeyboardHandler = new KeyboardHandler(false); // we don't want repeat enabled for a video game (except in menus or when writing something)
             ResourceHandler = new ResourceHandler();
-            RenderHandler = new RenderHandler();
+
+            switch (Config.TextureDisplayMode)
+            {
+                case TextureDisplayMode.Smooth:
+                    RenderHandler = new RenderHandlerSmooth();
+                    break;
+                default:
+                    RenderHandler = new RenderHandlerPixelPerfect();
+                    break;
+            }
             SceneHandler = new SceneHandler();
 
             SpriteSets = new Dictionary<string, SpriteSet>

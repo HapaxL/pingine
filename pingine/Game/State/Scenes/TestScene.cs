@@ -19,7 +19,7 @@ namespace pingine.Game.State.Scenes
             var entities = new Dictionary<ulong, Entity>();
             movingEntities = new Dictionary<ulong, TestEntity>();
 
-            for (int i = 0; i < 750; i++)
+            for (int i = 0; i < 150; i++)
             {
                 var cube = new TestEntity();
                 entities.Add(cube.Id, cube);
@@ -30,7 +30,7 @@ namespace pingine.Game.State.Scenes
             {
                 for (int i = 0; i < 80; i++)
                 {
-                    var tile = new TestTile(i * 16, j * 16, Game.RNG.Next(6));
+                    var tile = new TestTile(i * 16, j * 16, 0, Game.RNG.Next(6));
                     entities.Add(tile.Id, tile);
                 }
             }

@@ -15,6 +15,7 @@ namespace pingine.Game.State.Entities
             0,
             0)
         {
+            // vector = new Vector2(0, 0);
             vector = new Vector2((float) Game.RNG.NextDouble() * 2 - 1, (float) Game.RNG.NextDouble() * 2 - 1);
         }
 

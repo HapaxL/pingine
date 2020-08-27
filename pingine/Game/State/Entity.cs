@@ -8,15 +8,26 @@ namespace pingine.Game.State
 {
     public struct RenderData
     {
-        public Vector2 position;
-        public Color4 color;
+        public float x;
+        public float y;
+        // public Color4 color;
         public int texCoordX;
         public int texCoordY;
 
-        public RenderData(Vector2 position, int texCoordX, int texCoordY)
+        public RenderData(float x, float y, int texCoordX, int texCoordY)
         {
-            this.position = position;
-            this.color = new Color4(1f, 0f, 0f, 1f);
+            this.x = x;
+            this.y = y;
+            // this.color = new Color4(1f, 0f, 0f, 1f);
+            this.texCoordX = texCoordX;
+            this.texCoordY = texCoordY;
+        }
+
+        public void Update(float x, float y, int texCoordX, int texCoordY)
+        {
+            this.x = x;
+            this.y = y;
+            // this.color = new Color4(1f, 0f, 0f, 1f);
             this.texCoordX = texCoordX;
             this.texCoordY = texCoordY;
         }
@@ -90,7 +101,7 @@ namespace pingine.Game.State
         public int CurrentAnimation { get; protected set; }
 
         public TexId? TexId { get; set; }
-        private RenderData[] LastData { get; set; }
+        private RenderData[] RenderData { get; set; }
         private bool DataHasChanged { get; set; }
 
         public Entity(
@@ -110,7 +121,7 @@ namespace pingine.Game.State
             CurrentAnimation = baseAnimation;
             size = new Vector2(SpriteSet.SpriteWidth, SpriteSet.SpriteHeight);
             TexId = null;
-            LastData = null;
+            RenderData = new RenderData[4];
             DataHasChanged = true; // needs to be true so that LastData gets generated once before first render                                            // depth
         }
 
@@ -141,20 +152,19 @@ namespace pingine.Game.State
             new Vector2(0f, 1/2f),
         }; */
 
-        public RenderData[] GetRenderData()     // TODO save this render data for all given sprites instead of recreating it everytime
+        public RenderData[] GetRenderData()
         {
             if (DataHasChanged)
             {
                 var spriteBox = SpriteSet.SpriteBoxes[CurrentSprite];
-                LastData = new RenderData[4];
-                LastData[0] = new RenderData(position, spriteBox.Left, spriteBox.Top); // top-left
-                LastData[1] = new RenderData(new Vector2(position.X + size.X, position.Y), spriteBox.Right, spriteBox.Top); // top-right
-                LastData[2] = new RenderData(new Vector2(position.X + size.X, position.Y + size.Y), spriteBox.Right, spriteBox.Bottom); // bottom-right
-                LastData[3] = new RenderData(new Vector2(position.X, position.Y + size.Y), spriteBox.Left, spriteBox.Bottom); // bottom-left
+                RenderData[0].Update(position.X, position.Y, spriteBox.Left, spriteBox.Top); // top-left
+                RenderData[1].Update(position.X + size.X, position.Y, spriteBox.Right, spriteBox.Top); // top-right
+                RenderData[2].Update(position.X + size.X, position.Y + size.Y, spriteBox.Right, spriteBox.Bottom); // bottom-right
+                RenderData[3].Update(position.X, position.Y + size.Y, spriteBox.Left, spriteBox.Bottom); // bottom-left
                 DataHasChanged = false;
             }
 
-            return LastData;
+            return RenderData;
         }
     }
 }
