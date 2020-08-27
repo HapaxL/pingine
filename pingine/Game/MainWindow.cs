@@ -151,7 +151,7 @@ namespace pingine.Game
             GL.UniformMatrix4(u, false, ref OrthographicProjectionMatrix);
             Game.LogHandler.LogGLError("afterprojectionmatrix", GL.GetError());
 
-            Game.RenderHandler.Load();
+            Game.RenderHandler.Load(ShaderProgramId);
 
             Game.SceneHandler.LoadScene(Config.StartScene);
         }

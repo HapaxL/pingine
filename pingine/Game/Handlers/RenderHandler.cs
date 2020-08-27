@@ -42,7 +42,7 @@ namespace pingine.Game.Handlers
             renderDataSize = Vector2.SizeInBytes /*+ (sizeof(float) * 4)*/ + (sizeof(int) * 2);
         }
 
-        public void Load()
+        public void Load(ProgramId program)
         {
             /* generate a vertex array object (VAO) whose ID isn't already in use
              * this VBA will hold our one VBO */
@@ -91,6 +91,20 @@ namespace pingine.Game.Handlers
 
             Game.LogHandler.LogGLError("renderobject_beforeloadimage", GL.GetError());
 
+            /* get location of variables in the shader that we will bind to specific
+             * values that will last through shader calls until we override them */
+            var texUniformLocation = GL.GetUniformLocation(program, "tex");
+            Game.LogHandler.LogGLError("load_aftergetlocation", GL.GetError());
+            /* whenever we want the fragment (texture) shader to execute
+             * operations on more than one "texture unit" (mashing together
+             * two textures on a single sprite for example) we will need
+             * to specify texture unit IDs, thanks to uniforms.
+             * the default value of 0 works fine since we're always using
+             * 0 as our active texture. the line below gets the location
+             * of a uniform by its name, and assigns a value to it. */
+            GL.Uniform1(texUniformLocation, 0);
+            Game.LogHandler.LogGLError("load_afteruniform", GL.GetError());
+
             initialized = true;
         }
 
@@ -113,8 +127,15 @@ namespace pingine.Game.Handlers
 
         public void Render(ProgramId program)
         {
-            // var test = new OrderedMultiset<int, int, RenderObject>();
-            // spriteCount = sprites.Length;
+            /* get location of variables in the shader that we will bind to specific
+             * values that will last through shader calls until we override them */
+            var cameraUniformLocation = GL.GetUniformLocation(program, "camera");
+            Game.LogHandler.LogGLError("render_aftergetlocation", GL.GetError());
+
+            /* camera coordinates are sent to the shader on every rendering call so that every element in
+             * the game can be shifted in the same direction to give the illusion that the camera is moving */
+            GL.Uniform2(cameraUniformLocation, Game.Camera.X, Game.Camera.Y);
+            Game.LogHandler.LogGLError("render_afteruniform", GL.GetError());
 
             foreach (var obj in toUpdate)
             {
@@ -139,26 +160,7 @@ namespace pingine.Game.Handlers
                                                          * DynamicDraw = the data will be modified many times and used many times */
                                                         /* this does not actually change a lot, so whatever */
 
-            /* get location of variables in the shader that we will bind to
-             * specific values for the duration of the shader's use */
-            var texUniformLocation = GL.GetUniformLocation(program, "tex");
-            var cameraUniformLocation = GL.GetUniformLocation(program, "camera");
-
-            Game.LogHandler.LogGLError("render_aftergetlocation", GL.GetError());
-
-            /* whenever we want the fragment (texture) shader to execute
-             * operations on more than one "texture unit" (mashing together
-             * two textures on a single sprite for example) we will need
-             * to specify texture unit IDs, thanks to uniforms.
-             * the default value of 0 works fine since we're always using
-             * 0 as our active texture. the line below gets the location
-             * of a uniform by its name, and assigns a value to it. */
-            GL.Uniform1(texUniformLocation, 0);
-            /* camera coordinates are sent to the shader on every rendering call so that every element in
-             * the game can be shifted in the same direction to give the illusion that the camera is moving */
-            GL.Uniform2(cameraUniformLocation, Game.Camera.X, Game.Camera.Y);
-
-            Game.LogHandler.LogGLError("render_afteruniform", GL.GetError());
+            Game.LogHandler.LogGLError("render_afterbufferdata", GL.GetError());
 
             var verticesDrawn = 0;
 
@@ -166,7 +168,6 @@ namespace pingine.Game.Handlers
             {
                 GL.ActiveTexture(TextureUnit.Texture0);
                 GL.BindTexture(TextureTarget.Texture2D, o.TexId.Value);
-
                 Game.LogHandler.LogGLError("render_afterbindtexture", GL.GetError());
 
                 /* we specify that we want to take <count> VAO from our (active) vertex array(s),
@@ -177,7 +178,6 @@ namespace pingine.Game.Handlers
                 /* draw <count> vertices considered as groups of <mode> starting with <first> */
                 GL.DrawArrays(PrimitiveType.Quads, verticesDrawn, 4);
                 verticesDrawn += 4;
-
                 Game.LogHandler.LogGLError("render_afterdraw", GL.GetError());
 
                 GL.BindVertexArray(0);
